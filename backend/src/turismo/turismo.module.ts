@@ -4,6 +4,7 @@ import { ServicioAlgoritmoRutas } from './dominio/servicios/servicio-algoritmo-r
 import { ServicioNotificacionesUbicuas } from './dominio/servicios/servicio-notificaciones-ubicuas';
 import { OrquestadorTuristicoInteligente } from './aplicacion/orquestadores/orquestador-turistico-inteligente';
 import { ControladorInteroperabilidad } from './infraestructura/controladores/controlador-interoperabilidad';
+import { RegistroServicios } from './infraestructura/registro/registro-servicios';
 
 @Module({
   imports: [CqrsModule],
@@ -12,6 +13,7 @@ import { ControladorInteroperabilidad } from './infraestructura/controladores/co
     ServicioAlgoritmoRutas,
     ServicioNotificacionesUbicuas,
     OrquestadorTuristicoInteligente,
+    RegistroServicios,
   ],
 })
 export class TurismoModule {}

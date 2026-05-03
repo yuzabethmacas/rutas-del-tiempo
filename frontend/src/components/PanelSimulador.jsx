@@ -1,5 +1,4 @@
-import React from 'react';
-import { MapPin, Users, CloudRain, Sun } from 'lucide-react';
+import { MapPin, Users, CloudRain, Sun, ShieldCheck } from 'lucide-react';
 
 export function PanelSimulador({ 
   sitio, 
@@ -8,6 +7,8 @@ export function PanelSimulador({
   setAforo, 
   clima, 
   setClima,
+  tipoCliente,
+  setTipoCliente,
   enviarDatos,
   cargando
 }) {
@@ -21,12 +22,33 @@ export function PanelSimulador({
 
   return (
     <div className="glass-card p-6 flex flex-col gap-8 w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-2">
+      
+      {/* Mejora 1: Perfil de Interoperabilidad */}
+      <div className="space-y-3 p-4 bg-slate-100/50 rounded-2xl border border-slate-200">
+        <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2 uppercase tracking-wider">
+          <ShieldCheck size={16} className="text-brand-600" />
+          Perfil de Interoperabilidad
+        </h3>
+        <div className="grid grid-cols-2 gap-2">
+          <button 
+            onClick={() => setTipoCliente('turista')}
+            className={`text-xs py-2 px-3 rounded-lg font-medium transition-all ${tipoCliente === 'turista' ? 'bg-brand-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}`}
+          >
+            Turista (Estandar)
+          </button>
+          <button 
+            onClick={() => setTipoCliente('administrador')}
+            className={`text-xs py-2 px-3 rounded-lg font-medium transition-all ${tipoCliente === 'administrador' ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}`}
+          >
+            Administrador (Full)
+          </button>
+        </div>
+      </div>      <div className="space-y-2">
         <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
           <MapPin className="text-brand-500" size={24} />
-          Ubicación Actual
+          CT010: Consulta Condiciones (Sensor)
         </h2>
-        <p className="text-sm text-slate-500">Selecciona el punto turístico que deseas simular.</p>
+        <p className="text-sm text-slate-500">Selecciona el punto turístico que emitirá la señal externa al Mediador.</p>
         <select 
           className="w-full mt-2 p-3 rounded-xl border border-slate-200 bg-white shadow-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
           value={sitio}

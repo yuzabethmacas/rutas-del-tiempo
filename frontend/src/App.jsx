@@ -6,6 +6,7 @@ function App() {
   const [sitio, setSitio] = useState('Catedral Nueva');
   const [aforo, setAforo] = useState(30);
   const [clima, setClima] = useState('Soleado');
+  const [tipoCliente, setTipoCliente] = useState('turista'); // 'turista' | 'administrador'
   const [mensajes, setMensajes] = useState([]);
   const [cargando, setCargando] = useState(false);
 
@@ -16,14 +17,17 @@ function App() {
 
   const enviarDatosAlMediador = async () => {
     setCargando(true);
-    agregarMensaje(`Leyendo sensor en ${sitio}... Aforo: ${aforo}%, Clima: ${clima}`, 'info');
-    agregarMensaje(`Enviando evento al Controlador de Interoperabilidad...`, 'accion');
+    agregarMensaje(`[Táctica: Discover Service] Resolviendo URLs lógicas para clima y aforo...`, 'info');
+    agregarMensaje(`Enviando evento al Controlador... Header x-tipo-cliente: ${tipoCliente}`, 'accion');
 
     try {
       // Intentamos comunicarnos con el backend en NestJS
       const response = await fetch('http://localhost:4001/interoperabilidad/contexto', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-tipo-cliente': tipoCliente // Mejora 1: Tailor Interface
+        },
         body: JSON.stringify({
           identificadorSitio: sitio,
           porcentajeOcupacion: aforo,
@@ -31,38 +35,44 @@ function App() {
         })
       });
 
-      if (!response.ok) throw new Error('Error en la comunicación con el Mediador');
-
       const data = await response.json();
-      agregarMensaje(`Mediador Central recibió los datos: ${data.mensaje}`, 'exito');
+
+      if (response.status === 429) {
+        // Mejora 5: Rate Limiting
+        agregarMensaje(`[ERROR 429] ${data.message || 'Demasiadas solicitudes.'}`, 'alerta');
+        setCargando(false);
+        return;
+      }
+
+      if (!response.ok) {
+        // Mejora 4: Rechazo Estructurado
+        const msgError = data.errores ? JSON.stringify(data.errores) : (data.message || 'Error desconocido');
+        agregarMensaje(`[ERROR ${response.status}] Petición rechazada por el Mediador: ${msgError}`, 'alerta');
+        throw new Error('Rechazo por Contrato Semántico');
+      }
+
+      // Mejora 1: Tailor Interface
+      if (tipoCliente === 'administrador') {
+        agregarMensaje(`[MODO ADMIN] Datos Crudos del Sensor recibidos: ${JSON.stringify(data.datosCrudosSensor)}`, 'info');
+        agregarMensaje(`[MODO ADMIN] URLs Resueltas: Clima (${data.datosCrudosSensor.origenClima})`, 'info');
+      }
+      
+      agregarMensaje(`Mediador Central: ${data.mensaje || 'Datos procesados correctamente.'}`, 'exito');
 
       // Simulamos la respuesta de la lógica de negocio para demostración visual
-      // ya que el backend imprime en su propia consola
       setTimeout(() => {
         if (aforo > 80) {
-          agregarMensaje(`¡ALERTA DE SATURACIÓN! El Orquestador Turístico ha detectado que ${sitio} supera el 80% de aforo.`, 'alerta');
-          setTimeout(() => {
-            agregarMensaje(`ServicioAlgoritmoRutas: Calculando itinerario alternativo considerando clima ${clima}...`, 'accion');
-            setTimeout(() => {
-              const rutas = clima === 'Lluvioso' ? 'Museo Remigio Crespo' : 'Ruinas de Pumapungo';
-              agregarMensaje(`ServicioNotificacionesUbicuas: Enviando alerta push a usuarios sugiriendo visitar ${rutas}.`, 'exito');
-            }, 800);
-          }, 800);
+          agregarMensaje(`¡ALERTA DE SATURACIÓN! Orquestador detecta que ${sitio} supera el 80%.`, 'alerta');
+          const rutas = clima === 'Lluvioso' ? 'Museo Remigio Crespo' : 'Ruinas de Pumapungo';
+          agregarMensaje(`Redistribuyendo flujo hacia: ${rutas}`, 'exito');
         } else {
-          agregarMensaje(`Orquestador Turístico: El aforo de ${sitio} (${aforo}%) es manejable. No se requiere redistribución.`, 'exito');
+          agregarMensaje(`Orquestador Turístico: El aforo de ${sitio} (${aforo}%) es manejable.`, 'exito');
         }
       }, 500);
 
     } catch (error) {
-      agregarMensaje(`Error de conexión con el backend: Asegúrate de tener el servidor NestJS corriendo en localhost:3001.`, 'alerta');
-
-      // Fallback para demostración sin backend
-      agregarMensaje(`(Modo Simulación Activo sin Backend)`, 'info');
-      if (aforo > 80) {
-        agregarMensaje(`¡ALERTA DE SATURACIÓN! Orquestador detecta que ${sitio} supera el 80%.`, 'alerta');
-        agregarMensaje(`Redirigiendo flujo hacia ${clima === 'Lluvioso' ? 'Museos' : 'Parques'}...`, 'exito');
-      } else {
-        agregarMensaje(`Aforo normal. No se requiere intervención.`, 'exito');
+      if (error.message !== 'Rechazo por Contrato Semántico') {
+        agregarMensaje(`Error de conexión: Asegúrate de que el backend esté en el puerto 4001.`, 'alerta');
       }
     } finally {
       setCargando(false);
@@ -101,6 +111,8 @@ function App() {
             setAforo={setAforo}
             clima={clima}
             setClima={setClima}
+            tipoCliente={tipoCliente}
+            setTipoCliente={setTipoCliente}
             enviarDatos={enviarDatosAlMediador}
             cargando={cargando}
           />
