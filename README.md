@@ -8,24 +8,34 @@ El sistema está dividido en dos grandes componentes (Monorepositorio):
 
 ```text
 rutas-del-tiempo/
-├── backend/                # Lógica de Negocio y Orquestación (NestJS)
-│   ├── src/
-│   │   ├── turismo/        # Módulo Principal del Dominio
-│   │   │   ├── dominio/     # Reglas de negocio puras y eventos
-│   │   │   ├── aplicacion/  # Orquestadores y Casos de Uso (Mediadores)
-│   │   │   └── infraestructura/ # Controladores y entrada de datos
-│   │   ├── app.module.ts
-│   │   └── main.ts         # Configuración del servidor (Puerto 4001)
-│   └── README.md           # Guía técnica del Backend y Patrón Mediador
+├── backend/                             # API y Lógica de Negocio (NestJS)
+│   ├── src/turismo/
+│   │   ├── dominio/
+│   │   │   ├── contratos/contrato-datos-contextuales.ts # M2: Contrato Semántico (Valida datos)
+│   │   │   └── eventos/evento-datos-contextuales.ts     # Objeto Evento que viaja por el Mediador
+│   │   ├── aplicacion/
+│   │   │   └── orquestadores/orquestador-turistico-inteligente.ts # Mediador Concreto (Reglas de negocio)
+│   │   └── infraestructura/
+│   │       ├── controladores/controlador-interoperabilidad.ts   # Punto de entrada HTTP (Colega)
+│   │       ├── decoradores/tailor-respuesta.decorator.ts        #  Tailor Interface (Oculta datos)
+│   │       ├── filtros/interoperabilidad-exception.filter.ts    #  Error Response (Auditoría)
+│   │       ├── guardias/throttler-es.guard.ts                   #  Resource Management (Rate Limit)
+│   │       └── registro/registro-servicios.ts                   #  Discover Service (Localiza APIs)
+│   ├── app.module.ts                    # Configuración centralizada
+│   └── main.ts                          # Bootstrap del servidor (Puerto 4001, Filtros Globales)
 │
-├── frontend/               # Interfaz Visual y Simulador (React + Vite)
-│   ├── src/
-│   │   ├── components/     # Componentes visuales (Panel, Consola)
-│   │   ├── App.jsx         # Lógica del simulador y conexión con API
-│   │   └── index.css       # Estilos con Tailwind CSS y Glassmorphism
-│   ├── tailwind.config.cjs # Configuración de diseño y colores brand
-│   └── README.md           # Guía de uso del Simulador
-└── README.md               # Este archivo (Guía General)
+├── frontend/                            # Simulador Interactivo (React + Vite)
+│   ├── src/components/
+│   │   ├── ConsolaDecisiones.jsx        # Pantalla tipo "terminal" para ver trazas y errores visuales
+│   │   └── PanelSimulador.jsx           # Panel de control para enviar estímulos simulados (CT010)
+│   ├── src/App.jsx                      # Orquesta el simulador y realiza llamadas HTTP al backend
+│   └── src/index.css                    # Estilos CSS
+│
+├── docs/                                # Documentación Técnica
+│   ├── diagrama_clases.md               # Modelo estructural UML (PlantUML)
+│   ├── diagrama_secuencia.md            # Flujo temporal del dato (PlantUML)
+│   └── documentacion_completa.md        # Guía de exposición técnica y justificaciones (Bass et al.)
+└── README.md                            # Guía General (Este archivo)
 ```
 
 ---
@@ -70,15 +80,15 @@ npm run dev
 
 ---
 
-## 📐 Arquitectura de Interoperabilidad (Capítulo 6)
+## 📐 Arquitectura de Interoperabilidad y Caso de Uso CT010
 
-El sistema ha sido mejorado siguiendo las tácticas de **Interoperabilidad** del libro *Software Architecture in Practice*:
+El sistema ha sido codificado para resolver el **Caso de Uso CT010** siguiendo las tácticas de **Interoperabilidad** e **Integridad** del libro *Software Architecture in Practice (Capítulo 6)*:
 
-1.  **Tailor Interface:** El backend adapta la respuesta según el perfil (Turista o Administrador) mediante interceptores dinámicos.
-2.  **Contratos Semánticos:** Validación estricta de modelos de datos (DTOs) para asegurar que los sensores hablen el mismo idioma que el Mediador.
-3.  **Discover Service:** Implementación de indirección para resolver URLs de servicios externos (clima, aforo) sin acoplamiento rígido.
-4.  **Rechazo y Registro:** Filtros de excepciones que auditan peticiones malformadas y protegen el núcleo del sistema.
-5.  **Gestión de Recursos:** Control de flujo (Rate Limiting) para prevenir saturación por sensores defectuosos.
+1.  **Tailor Interface:** El backend adapta la respuesta según el perfil (Turista/Admin).
+2.  **Contratos Semánticos:** Validación estricta (DTOs) que rechaza datos anómalos, respondiendo a la pregunta de integridad **I1** (Sensores descalibrados).
+3.  **Discover Service:** Indirección para resolver URLs de APIs externas dinámicamente, respondiendo a la pregunta de interoperabilidad **In1** (Dependencia de sistemas externos).
+4.  **Rechazo y Registro:** Filtros de excepciones (Exception Filters) que auditan peticiones malformadas para no corromper la base de datos.
+5.  **Gestión de Recursos:** Control de flujo (Rate Limiting) para prevenir saturación por ataques o sensores defectuosos.
 
 ---
 
