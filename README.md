@@ -91,19 +91,3 @@ El sistema ha sido codificado para resolver el **Caso de Uso CT010** siguiendo l
 5.  **Gestión de Recursos:** Control de flujo (Rate Limiting) para prevenir saturación por ataques o sensores defectuosos.
 
 ---
-
-## 📚 Documentación para la Presentación
-
-He consolidado toda la información necesaria (guías, pruebas y arquitectura) en un solo lugar:
-
-👉 **[Documentación Completa del Proyecto](./docs/documentacion_completa.md)**
-
-En este documento encontrarás:
-- Estructura detallada del proyecto.
-- Guía de instalación desde GitHub.
-- Explicación profunda de Tácticas y Patrones.
-- Guía paso a paso para la demo en vivo.
-- Enlaces a los diagramas de Clases y Secuencia.
-
-
----
